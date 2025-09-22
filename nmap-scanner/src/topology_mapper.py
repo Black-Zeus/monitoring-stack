@@ -18,6 +18,7 @@ INFLUX_TOKEN = os.getenv("INFLUX_TOKEN", "")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "home")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "nmap_bucket")
 
+
 def discover_topology():
     """Descubre la topología usando traceroute y análisis de ARP"""
     topology_data = {
@@ -25,6 +26,13 @@ def discover_topology():
         "nodes": [],
         "edges": []
     }
+    
+    # Agregar nodo local
+    topology_data["nodes"].append({
+        "id": "local",
+        "type": "host", 
+        "label": "Local Host"
+    })
     
     # 1. Obtener gateway por defecto
     try:
@@ -41,64 +49,38 @@ def discover_topology():
         })
     except Exception as e:
         logging.error(f"Error detectando gateway: {e}")
-        return topology_data
 
     # 2. Escaneo ping para hosts activos
     active_hosts = discover_active_hosts()
     
-    # 3. Para cada host activo, hacer traceroute para encontrar rutas
+    # 3. Agregar hosts activos como nodos
     for host in active_hosts:
-        try:
-            trace_result = subprocess.run(
-                ['traceroute', '-n', '-m', '5', host], 
-                capture_output=True, text=True, timeout=30
-            )
-            
-            hops = parse_traceroute(trace_result.stdout)
-            
-            # Agregar nodo del host
+        if not any(node["id"] == host for node in topology_data["nodes"]):
             topology_data["nodes"].append({
                 "id": host,
                 "type": "host",
                 "label": f"Host {host}"
             })
-            
-            # Agregar edges basados en traceroute
-            prev_hop = None
-            for hop in hops:
-                if hop != host:  # No agregar el destino como hop intermedio
-                    topology_data["nodes"].append({
-                        "id": hop,
-                        "type": "router",
-                        "label": f"Router {hop}"
-                    })
-                
-                if prev_hop:
-                    topology_data["edges"].append({
-                        "source": prev_hop,
-                        "target": hop,
-                        "type": "route"
-                    })
-                prev_hop = hop
-            
-            # Conectar último hop con destino
-            if hops:
-                topology_data["edges"].append({
-                    "source": hops[-1],
-                    "target": host,
-                    "type": "route"
-                })
-        
-        except Exception as e:
-            logging.error(f"Error en traceroute para {host}: {e}")
-    
+
     # 4. Análisis de tabla ARP para dispositivos en misma subred
     try:
         arp_neighbors = get_arp_neighbors()
         for neighbor in arp_neighbors:
+            neighbor_ip = neighbor["ip"]
+            
+            # Agregar nodo si no existe
+            if not any(node["id"] == neighbor_ip for node in topology_data["nodes"]):
+                node_type = "gateway" if neighbor_ip == gateway_ip else "host"
+                topology_data["nodes"].append({
+                    "id": neighbor_ip,
+                    "type": node_type,
+                    "label": f"Host {neighbor_ip}"
+                })
+            
+            # Agregar edge
             topology_data["edges"].append({
                 "source": "local",
-                "target": neighbor["ip"],
+                "target": neighbor_ip,
                 "type": "l2_neighbor",
                 "mac": neighbor["mac"]
             })
