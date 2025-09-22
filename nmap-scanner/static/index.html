@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Scanner Control</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Network Scanner Control</h1>
+        
+        <div class="current-config">
+            <h3>Configuración Actual</h3>
+            <p id="currentNetwork">Cargando...</p>
+        </div>
+        
+        <form id="scanForm">
+            <div class="form-group">
+                <label for="network">Red a Escanear (CIDR)</label>
+                <input type="text" id="network" name="network" placeholder="192.168.1.0/24" required>
+                
+                <div class="examples">
+                    <h3>Ejemplos Comunes:</h3>
+                    <ul>
+                        <li onclick="setNetwork('192.168.1.0/24')">192.168.1.0/24 - Red doméstica típica</li>
+                        <li onclick="setNetwork('192.168.0.0/24')">192.168.0.0/24 - Red doméstica alternativa</li>
+                        <li onclick="setNetwork('10.0.1.0/24')">10.0.1.0/24 - Red empresarial</li>
+                        <li onclick="setNetwork('172.16.0.0/16')">172.16.0.0/16 - Red corporativa amplia</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="scanType">Tipo de Escaneo</label>
+                <select id="scanType" name="scanType">
+                    <option value="ports">Solo Puertos (-sV)</option>
+                    <option value="topology">Solo Topología</option>
+                    <option value="both">Puertos + Topología</option>
+                </select>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn-scan">🚀 Iniciar Escaneo</button>
+                <button type="button" class="btn-topology" onclick="checkStatus()">📊 Ver Estado</button>
+            </div>
+        </form>
+        
+        <div id="status" class="status"></div>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

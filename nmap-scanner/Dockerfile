@@ -19,9 +19,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código fuente
 COPY src/ ./src/
 COPY scripts/ ./scripts/
+COPY static/ ./static/
 
 # Hacer ejecutables los scripts
-RUN chmod +x scripts/entrypoint.sh src/scan.py src/topology_mapper.py
+RUN chmod +x scripts/entrypoint.sh src/scan.py src/topology_mapper.py src/server.py
 
 # Crear directorios necesarios
 RUN mkdir -p /results /var/log

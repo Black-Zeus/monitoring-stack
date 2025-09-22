@@ -21,7 +21,8 @@ services:
       - "5556:5556" # API
     volumes:
       - ntop_data:/data
-    command: ["--redis", "redis:6379"]
+    #command: ["--redis", "redis:6379"]
+    command: ["--redis", "redis:6379", "--http-server-auth-type", "none"]
 
   influxdb:
     image: influxdb:2.7
@@ -105,6 +106,12 @@ services:
       - INFLUX_ORG=home
       - INFLUX_BUCKET=nmap_bucket
       - COLLECTION_INTERVAL=300
+    command: >
+      sh -c "
+        echo 'Esperando que InfluxDB esté completamente listo...' &&
+        sleep 45 &&
+        python3 src/ntopng_collector.py
+      "
 
   topology-viewer:
     build:
