@@ -1,0 +1,7 @@
+# Crontab de nmap-scanner
+# Variables como $SCAN_SCHEDULE en docker-compose.yml controlan la frecuencia
+# Ejemplo: "0 */6 * * *" → cada 6 horas
+
+# Sintaxis cron: m h dom mon dow user command
+# Aquí 'root' es el usuario dentro del contenedor
+$SCAN_SCHEDULE root /usr/local/bin/python /opt/nmap-scanner/scan.py >> /var/log/nmap_scanner.log 2>&1

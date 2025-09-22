@@ -1,0 +1,130 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: ntop_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  ntopng:
+    image: ntop/ntopng:latest
+    container_name: ntopng
+    restart: unless-stopped
+    depends_on:
+      - redis
+    environment:
+      - TZ=America/Santiago
+      - NTOP_PERSISTENCE=1
+      - REDIS_HOST=redis
+    ports:
+      - "3000:3000" # UI
+      - "5556:5556" # API
+    volumes:
+      - ntop_data:/data
+    # Configurar ntopng para escuchar en todas las interfaces
+    command: ["--http-server", "0.0.0.0:3000", "--redis", "redis:6379"]
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    restart: unless-stopped
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=changeme_influx
+      - DOCKER_INFLUXDB_INIT_ORG=home
+      - DOCKER_INFLUXDB_INIT_BUCKET=nmap_bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=supersecrettoken
+    ports:
+      - "8086:8086"
+    volumes:
+      - influx_data:/var/lib/influxdb2
+
+  grafana:
+    image: grafana/grafana-oss:10.0.0
+    container_name: grafana
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+      - ntopng
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=changeme_grafana
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=vonage-status-panel
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+
+  nmap-scanner:
+    build:
+      context: ./nmap-scanner
+      dockerfile: Dockerfile
+    container_name: nmap_scanner
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    environment:
+      - TZ=America/Santiago
+      - TARGET_NETWORK=192.168.1.0/24
+      - SCAN_SCHEDULE=0 */6 * * *
+      - TOPOLOGY_SCHEDULE=0 */12 * * *
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_TOKEN=supersecrettoken
+      - INFLUX_ORG=home
+      - INFLUX_BUCKET=nmap_bucket
+      - HTTP_PORT=8080
+      - SCAN_TIMEOUT=900
+    ports:
+      - "8082:8080"
+    volumes:
+      - nmap_results:/results
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    network_mode: host
+
+  ntopng-collector:
+    build:
+      context: ./nmap-scanner
+      dockerfile: Dockerfile
+    container_name: ntopng_collector
+    restart: unless-stopped
+    depends_on:
+      - ntopng
+      - influxdb
+    environment:
+      - TZ=America/Santiago
+      - NTOPNG_URL=http://ntopng:3000
+      - NTOPNG_USER=admin
+      - NTOPNG_PASSWORD=admin
+      - INFLUX_URL=http://influxdb:8086
+      - INFLUX_TOKEN=supersecrettoken
+      - INFLUX_ORG=home
+      - INFLUX_BUCKET=nmap_bucket
+      - COLLECTION_INTERVAL=300
+      # Sin schedules de cron para el collector
+    command: ["python3", "/opt/nmap-scanner/ntopng_collector.py"]
+
+  # Opcional: Servicio para visualización de topología
+  topology-viewer:
+    build:
+      context: ./topology-viewer
+      dockerfile: Dockerfile
+    container_name: topology_viewer
+    restart: unless-stopped
+    ports:
+      - "8083:80"
+    volumes:
+      - nmap_results:/usr/share/nginx/html/results:ro
+      - ./topology-viewer:/usr/share/nginx/html:ro
+    depends_on:
+      - nmap-scanner
+
+volumes:
+  redis_data:
+  ntop_data:
+  influx_data:
+  nmap_results:

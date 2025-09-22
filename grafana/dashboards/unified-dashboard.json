@@ -1,0 +1,103 @@
+{
+  "uid": "ntop-nmap-unified",
+  "title": "Visibilidad Red Doméstica (ntopng + Nmap)",
+  "tags": ["ntopng", "nmap", "influxdb", "home-network"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "1m",
+  "panels": [
+    {
+      "type": "text",
+      "title": "Resumen",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "content": "<b>Dashboard combinado (ntopng + Nmap)</b><br><ul><li>Paneles Nmap: resultados de escaneo guardados en InfluxDB (bucket <code>nmap_bucket</code>).</li><li>Paneles ntopng: puedes agregar métricas de tráfico en vivo exportadas vía API o InfluxDB/Prometheus.</li><li>Para forzar scan manual: <code>curl -X POST http://localhost:8082/scan</code></li></ul>",
+        "mode": "html"
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Hosts únicos (últimos 7 días)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 3 },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "flux",
+          "datasource": { "type": "influxdb", "uid": "InfluxDB" },
+          "query": "from(bucket: \"nmap_bucket\")\n  |> range(start: -7d)\n  |> filter(fn: (r) => r._measurement == \"nmap_ports\")\n  |> distinct(column: \"ip\")\n  |> count()"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Puertos detectados por host (últimos 7d)",
+      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 3 },
+      "fieldConfig": { "defaults": { "unit": "none" } },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "flux",
+          "datasource": { "type": "influxdb", "uid": "InfluxDB" },
+          "query": "from(bucket:\"nmap_bucket\")\n  |> range(start:-7d)\n  |> filter(fn: (r) => r._measurement == \"nmap_ports\")\n  |> keep(columns:[\"_time\",\"ip\"])\n  |> aggregateWindow(every: 1h, fn: count, createEmpty: false)\n  |> group(columns:[\"ip\"])"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Hosts — Puertos detectados (último scan)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 11 },
+      "options": { "showHeader": true },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "flux",
+          "datasource": { "type": "influxdb", "uid": "InfluxDB" },
+          "query": "from(bucket:\"nmap_bucket\")\n  |> range(start:-30d)\n  |> filter(fn: (r) => r._measurement == \"nmap_ports\")\n  |> group(columns:[\"ip\",\"port\"])\n  |> last()\n  |> keep(columns:[\"ip\",\"port\",\"protocol\",\"service\",\"_time\"])\n  |> rename(columns:{_time:\"last_seen\"})\n  |> sort(columns:[\"ip\",\"port\"])"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Puertos por protocolo (resumen)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 11 },
+      "targets": [
+        {
+          "refId": "A",
+          "queryType": "flux",
+          "datasource": { "type": "influxdb", "uid": "InfluxDB" },
+          "query": "from(bucket:\"nmap_bucket\")\n  |> range(start:-30d)\n  |> filter(fn:(r)=> r._measurement==\"nmap_ports\")\n  |> group(columns:[\"protocol\"])\n  |> count(column:\"protocol\")\n  |> sort(columns:[\"_value\"], desc:true)"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "title": "ntopng - Placeholder",
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 19 },
+      "options": {
+        "content": "<b>Sugerencia:</b> añade paneles con métricas de ntopng aquí (Top Talkers, Breakdown de protocolos, conexiones activas). Usa datasource InfluxDB o plugin ntopng según tu integración.",
+        "mode": "html"
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "influxds",
+        "label": "Datasource InfluxDB",
+        "query": "influxdb",
+        "hide": 2,
+        "current": { "text": "InfluxDB", "value": "InfluxDB" }
+      }
+    ]
+  }
+}

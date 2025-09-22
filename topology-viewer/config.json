@@ -1,0 +1,65 @@
+{
+  "visualization": {
+    "width": 800,
+    "height": 600,
+    "autoResize": true,
+    "defaultLayout": "force",
+    "refreshInterval": 300000,
+    "zoomLimits": {
+      "min": 0.1,
+      "max": 3.0
+    }
+  },
+  "nodes": {
+    "sizes": {
+      "gateway": 20,
+      "router": 16,
+      "host": 14,
+      "switch": 18,
+      "unknown": 12
+    },
+    "colors": {
+      "gateway": "#FF6B35",
+      "router": "#4ECDC4",
+      "host": "#45B7D1",
+      "switch": "#96CEB4",
+      "unknown": "#95A5A6"
+    },
+    "icons": {
+      "gateway": "🌐",
+      "router": "📡",
+      "host": "💻",
+      "switch": "🔀",
+      "unknown": "❓"
+    }
+  },
+  "links": {
+    "colors": {
+      "route": "#74C365",
+      "l2_neighbor": "#3498DB",
+      "unknown": "#BDC3C7"
+    },
+    "widths": {
+      "default": 2,
+      "highlighted": 3
+    }
+  },
+  "simulation": {
+    "linkDistance": 100,
+    "chargeStrength": -300,
+    "collisionRadius": 30,
+    "alphaTarget": 0.3
+  },
+  "dataSource": {
+    "url": "/topology.json",
+    "fallbackUrl": "/topology_backup.json",
+    "timeout": 10000
+  },
+  "ui": {
+    "showLegend": true,
+    "showStats": true,
+    "showDeviceList": true,
+    "maxLabelLength": 15,
+    "highlightDuration": 3000
+  }
+}

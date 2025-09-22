@@ -1,0 +1,782 @@
+/* topology-viewer/style.css - Estilos completos para el visualizador de topología */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+/* ================================
+   HEADER STYLES
+   ================================ */
+header {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-bottom: 3px solid #3498db;
+}
+
+header h1 {
+    font-size: 1.8rem;
+    font-weight: 300;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.controls button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 25px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.controls button:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.controls button:active {
+    transform: translateY(0);
+}
+
+.last-update {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 300;
+}
+
+/* ================================
+   MAIN CONTENT LAYOUT
+   ================================ */
+main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ================================
+   SIDEBAR STYLES
+   ================================ */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    border-right: 2px solid #dee2e6;
+    padding: 1.5rem;
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+}
+
+.sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent 0%, #3498db 50%, transparent 100%);
+}
+
+.sidebar h3 {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+    position: relative;
+}
+
+.sidebar h3::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: #e74c3c;
+}
+
+/* ================================
+   LEGEND STYLES
+   ================================ */
+.legend {
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #3498db;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+    padding: 0.3rem;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.legend-item:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.legend-item .node {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    margin-right: 0.8rem;
+    border: 2px solid #333;
+    flex-shrink: 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.legend-item .node.gateway {
+    background-color: #FF6B35;
+    border-color: #e55a2b;
+}
+
+.legend-item .node.router {
+    background-color: #4ECDC4;
+    border-color: #45b7aa;
+}
+
+.legend-item .node.host {
+    background-color: #45B7D1;
+    border-color: #3a9bc1;
+}
+
+.legend-item .node.switch {
+    background-color: #96CEB4;
+    border-color: #7fb8a3;
+}
+
+.legend-item .node.unknown {
+    background-color: #95A5A6;
+    border-color: #7f8c8d;
+}
+
+.legend-item .edge {
+    width: 30px;
+    height: 3px;
+    margin-right: 0.8rem;
+    flex-shrink: 0;
+    border-radius: 2px;
+}
+
+.legend-item .edge.route {
+    background-color: #74C365;
+}
+
+.legend-item .edge.l2 {
+    background-color: #3498DB;
+}
+
+/* ================================
+   STATS STYLES
+   ================================ */
+.stats {
+    margin-bottom: 2rem;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #27ae60;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+    padding: 0.6rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px;
+    border-left: 3px solid #3498db;
+    transition: all 0.3s ease;
+}
+
+.stat:hover {
+    transform: translateX(3px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.stat:last-child {
+    margin-bottom: 0;
+}
+
+.stat .label {
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.stat span:last-child {
+    font-weight: bold;
+    color: #2c3e50;
+    font-size: 1rem;
+    background: #3498db;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* ================================
+   DEVICE LIST STYLES
+   ================================ */
+.device-list {
+    flex: 1;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #e74c3c;
+}
+
+.device-items {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.device-type-group {
+    margin-bottom: 1.5rem;
+}
+
+.device-type-group:last-child {
+    margin-bottom: 0;
+}
+
+.device-type-group h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.8rem;
+    padding: 0.5rem;
+    border-bottom: 1px solid #dee2e6;
+    background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+    border-radius: 5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.device-item {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem;
+    margin-bottom: 0.4rem;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+    position: relative;
+}
+
+.device-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: #3498db;
+    border-radius: 0 8px 8px 0;
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.device-item:hover {
+    background: linear-gradient(135deg, #e8f4f8 0%, #d5e8f0 100%);
+    border-color: #3498db;
+    transform: translateX(8px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.device-item:hover::before {
+    transform: scaleY(1);
+}
+
+.device-icon {
+    margin-right: 0.8rem;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.device-name {
+    font-size: 0.85rem;
+    color: #555;
+    font-weight: 500;
+    flex: 1;
+}
+
+/* ================================
+   VISUALIZATION AREA STYLES
+   ================================ */
+.visualization {
+    flex: 1;
+    background: radial-gradient(circle at center, #ffffff 0%, #f7f9fc 100%);
+    position: relative;
+    overflow: hidden;
+    border-top-right-radius: 10px;
+}
+
+#topology-svg {
+    width: 100%;
+    height: 100%;
+    cursor: grab;
+    background: radial-gradient(circle at 30% 20%, rgba(52, 152, 219, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(155, 89, 182, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #fafafa 0%, #f0f0f0 100%);
+}
+
+#topology-svg:active {
+    cursor: grabbing;
+}
+
+/* ================================
+   SVG ELEMENT STYLES
+   ================================ */
+.links line {
+    stroke-opacity: 0.8;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.links line:hover {
+    stroke-width: 4px !important;
+    stroke-opacity: 1;
+}
+
+.nodes circle {
+    stroke-opacity: 0.9;
+    cursor: pointer;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+    transition: all 0.3s ease;
+}
+
+.nodes circle:hover {
+    filter: drop-shadow(4px 4px 12px rgba(0, 0, 0, 0.3));
+    transform: scale(1.1);
+}
+
+.nodes text {
+    font-family: 'Segoe UI', sans-serif;
+    user-select: none;
+    pointer-events: none;
+    font-weight: 500;
+}
+
+.nodes .node text:last-child {
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* ================================
+   FOOTER STYLES
+   ================================ */
+footer {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 3px solid #3498db;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.status.loading {
+    background: rgba(243, 156, 18, 0.2);
+    color: #f39c12;
+    border: 1px solid rgba(243, 156, 18, 0.4);
+}
+
+.status.success {
+    background: rgba(39, 174, 96, 0.2);
+    color: #27ae60;
+    border: 1px solid rgba(39, 174, 96, 0.4);
+}
+
+.status.warning {
+    background: rgba(230, 126, 34, 0.2);
+    color: #e67e22;
+    border: 1px solid rgba(230, 126, 34, 0.4);
+}
+
+.status.error {
+    background: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.4);
+}
+
+.status-indicator {
+    font-size: 1.1rem;
+    animation: pulse 2s infinite;
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+@keyframes pulse {
+    0% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.6;
+        transform: scale(1.05);
+    }
+    100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.device-type-group {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.sidebar {
+    animation: slideInLeft 0.6s ease-out;
+}
+
+/* ================================
+   SCROLLBAR STYLES
+   ================================ */
+.sidebar::-webkit-scrollbar,
+.device-items::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.device-items::-webkit-scrollbar-track {
+    background: rgba(241, 241, 241, 0.5);
+    border-radius: 4px;
+    backdrop-filter: blur(5px);
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.device-items::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #bdc3c7 0%, #95a5a6 100%);
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.device-items::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #95a5a6 0%, #7f8c8d 100%);
+}
+
+/* ================================
+   LOADING OVERLAY
+   ================================ */
+.loading-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ================================
+   TOOLTIP STYLES
+   ================================ */
+.tooltip {
+    position: absolute;
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    pointer-events: none;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* ================================
+   RESPONSIVE DESIGN
+   ================================ */
+@media (max-width: 1200px) {
+    .container {
+        max-width: 100%;
+    }
+    
+    .sidebar {
+        width: 260px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .container {
+        border-radius: 0;
+        height: 100vh;
+    }
+    
+    .sidebar {
+        width: 250px;
+    }
+    
+    header {
+        padding: 1rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .controls button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        overflow: auto;
+    }
+    
+    .container {
+        height: auto;
+        min-height: 100vh;
+    }
+    
+    main {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        max-height: 300px;
+        border-right: none;
+        border-bottom: 2px solid #dee2e6;
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .visualization {
+        height: 500px;
+        min-height: 400px;
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+    
+    .last-update {
+        display: none;
+    }
+    
+    .device-items {
+        max-height: 150px;
+    }
+    
+    header h1 {
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .controls {
+        flex-direction: row;
+        justify-content: center;
+    }
+    
+    .sidebar {
+        padding: 1rem;
+        max-height: 250px;
+    }
+    
+    .visualization {
+        height: 400px;
+    }
+    
+    .stats .stat {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.3rem;
+    }
+    
+    .device-item {
+        justify-content: center;
+    }
+}
+
+/* ================================
+   HIGH CONTRAST MODE
+   ================================ */
+@media (prefers-contrast: high) {
+    .container {
+        background: white;
+        border: 2px solid #000;
+    }
+    
+    .sidebar {
+        background: #f0f0f0;
+        border-right: 3px solid #000;
+    }
+    
+    .legend-item .node,
+    .device-item {
+        border: 2px solid #000;
+    }
+    
+    .status {
+        border: 2px solid currentColor;
+    }
+}
+
+/* ================================
+   REDUCED MOTION
+   ================================ */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .nodes circle {
+        filter: none;
+    }
+    
+    .device-item:hover {
+        transform: none;
+    }
+}
+
+/* ================================
+   PRINT STYLES
+   ================================ */
+@media print {
+    body {
+        background: white;
+    }
+    
+    .container {
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .sidebar {
+        width: 200px;
+        background: white;
+    }
+    
+    .controls {
+        display: none;
+    }
+    
+    .status {
+        display: none;
+    }
+    
+    #topology-svg {
+        background: white;
+    }
+}
