@@ -21,8 +21,7 @@ services:
       - "5556:5556" # API
     volumes:
       - ntop_data:/data
-    # Configurar ntopng para escuchar en todas las interfaces
-    command: ["--http-server", "0.0.0.0:3000", "--redis", "redis:6379"]
+    command: ["--redis", "redis:6379"]
 
   influxdb:
     image: influxdb:2.7
@@ -77,10 +76,11 @@ services:
       - INFLUX_BUCKET=nmap_bucket
       - HTTP_PORT=8080
       - SCAN_TIMEOUT=900
+      - RUN_INITIAL_SCAN=false
     ports:
       - "8082:8080"
     volumes:
-      - nmap_results:/results
+      - scan_results:/results
     cap_add:
       - NET_RAW
       - NET_ADMIN
@@ -88,7 +88,7 @@ services:
 
   ntopng-collector:
     build:
-      context: ./nmap-scanner
+      context: ./ntopng-collector
       dockerfile: Dockerfile
     container_name: ntopng_collector
     restart: unless-stopped
@@ -105,26 +105,22 @@ services:
       - INFLUX_ORG=home
       - INFLUX_BUCKET=nmap_bucket
       - COLLECTION_INTERVAL=300
-      # Sin schedules de cron para el collector
-    command: ["python3", "/opt/nmap-scanner/ntopng_collector.py"]
 
-  # Opcional: Servicio para visualización de topología
   topology-viewer:
     build:
       context: ./topology-viewer
       dockerfile: Dockerfile
     container_name: topology_viewer
     restart: unless-stopped
+    depends_on:
+      - nmap-scanner
     ports:
       - "8083:80"
     volumes:
-      - nmap_results:/usr/share/nginx/html/results:ro
-      - ./topology-viewer:/usr/share/nginx/html:ro
-    depends_on:
-      - nmap-scanner
+      - scan_results:/usr/share/nginx/html/results:ro
 
 volumes:
   redis_data:
   ntop_data:
   influx_data:
-  nmap_results:
+  scan_results:

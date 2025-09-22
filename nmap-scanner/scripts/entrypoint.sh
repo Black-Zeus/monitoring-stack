@@ -3,14 +3,14 @@ set -e
 
 CRON_FILE="/etc/cron.d/nmap_scanner"
 
-# Configurar tareas programadas
+# Configurar tareas programadas para nmap-scanner únicamente
 echo "# Escaneo de puertos y servicios" > $CRON_FILE
-echo "$SCAN_SCHEDULE root /usr/local/bin/python /opt/nmap-scanner/scan.py >> /var/log/nmap_scanner.log 2>&1" >> $CRON_FILE
+echo "$SCAN_SCHEDULE root /usr/local/bin/python /opt/nmap-scanner/src/scan.py >> /var/log/nmap_scanner.log 2>&1" >> $CRON_FILE
 
 # Agregar mapeo topológico si está definido
 if [ ! -z "$TOPOLOGY_SCHEDULE" ]; then
     echo "# Mapeo topológico de red" >> $CRON_FILE
-    echo "$TOPOLOGY_SCHEDULE root /usr/local/bin/python /opt/nmap-scanner/topology_mapper.py >> /var/log/topology.log 2>&1" >> $CRON_FILE
+    echo "$TOPOLOGY_SCHEDULE root /usr/local/bin/python /opt/nmap-scanner/src/topology_mapper.py >> /var/log/topology.log 2>&1" >> $CRON_FILE
 fi
 
 # Configurar permisos y iniciar cron
@@ -18,7 +18,7 @@ chmod 0644 $CRON_FILE
 crontab $CRON_FILE
 service cron start
 
-echo "✅ Cron configurado:"
+echo "✅ Cron configurado para nmap-scanner:"
 echo "   - Scan: $SCAN_SCHEDULE"
 if [ ! -z "$TOPOLOGY_SCHEDULE" ]; then
     echo "   - Topología: $TOPOLOGY_SCHEDULE"
@@ -31,17 +31,17 @@ mkdir -p /var/log
 # Ejecutar scan inicial (opcional)
 if [ "$RUN_INITIAL_SCAN" = "true" ]; then
     echo "🔍 Ejecutando scan inicial..."
-    /usr/local/bin/python /opt/nmap-scanner/scan.py &
+    /usr/local/bin/python /opt/nmap-scanner/src/scan.py &
     
     if [ ! -z "$TOPOLOGY_SCHEDULE" ]; then
         echo "🗺️  Ejecutando mapeo topológico inicial..."
-        /usr/local/bin/python /opt/nmap-scanner/topology_mapper.py &
+        /usr/local/bin/python /opt/nmap-scanner/src/topology_mapper.py &
     fi
 fi
 
 echo "🚀 Iniciando servidor HTTP en puerto $HTTP_PORT..."
 
-# Servidor HTTP mejorado para triggers manuales
+# Servidor HTTP para triggers manuales
 python3 - <<'PY'
 import os, subprocess, http.server, socketserver, json, threading
 from datetime import datetime
@@ -54,7 +54,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             try:
                 subprocess.Popen([
                     "/usr/local/bin/python", 
-                    "/opt/nmap-scanner/scan.py"
+                    "/opt/nmap-scanner/src/scan.py"
                 ])
                 self.send_response(202)
                 self.send_header('Content-Type', 'application/json')
@@ -74,7 +74,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             try:
                 subprocess.Popen([
                     "/usr/local/bin/python",
-                    "/opt/nmap-scanner/topology_mapper.py"
+                    "/opt/nmap-scanner/src/topology_mapper.py"
                 ])
                 self.send_response(202)
                 self.send_header('Content-Type', 'application/json')
@@ -136,16 +136,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
     
     def log_message(self, format, *args):
-        # Log personalizado
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{timestamp}] {format % args}")
-
-print(f"🌐 Servidor HTTP iniciado en puerto {PORT}")
-print("📋 Endpoints disponibles:")
-print("   POST /scan      - Ejecutar escaneo manual")
-print("   POST /topology  - Ejecutar mapeo topológico")
-print("   GET  /health    - Estado del servicio") 
-print("   GET  /status    - Información detallada")
 
 with socketserver.TCPServer(("", PORT), Handler) as httpd:
     try:
