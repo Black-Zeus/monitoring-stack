@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "created": "2025-01-20T00:00:00Z",
+  "networks": {},
+  "scan_limits": {
+    "max_hosts_per_scan": 254,
+    "max_ports_per_host": 65535,
+    "phase1_timeout": 1800,
+    "phase2_timeout": 3600,
+    "concurrent_scans": 1
+  },
+  "scan_options": {
+    "phase1": {
+      "command": "nmap -p- --open -sS --min-rate 5000 -vvv -n -Pn",
+      "description": "Descubrimiento rápido de puertos abiertos"
+    },
+    "phase2": {
+      "command": "nmap -sCV -p{ports}",
+      "description": "Detección de servicios y versiones en puertos específicos"
+    }
+  },
+  "influxdb": {
+    "enabled": true,
+    "url": "http://influxdb:8086",
+    "token": "supersecrettoken",
+    "org": "home",
+    "bucket": "nmap_bucket",
+    "measurement": "advanced_nmap_scan"
+  },
+  "output": {
+    "results_dir": "/results",
+    "keep_xml_files": true,
+    "max_history_files": 50,
+    "history_file": "/results/scan_history.json"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "/var/log/advanced_scan.log",
+    "max_size_mb": 10,
+    "backup_count": 5
+  }
+}
