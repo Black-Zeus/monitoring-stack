@@ -3,86 +3,280 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topología de Red - Network Scanner</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Network Topology Manager - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌐</text></svg>">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🌐 Mapa Topológico de Red</h1>
-            <div class="controls">
-                <button onclick="refreshTopology()">🔄 Actualizar</button>
-                <button onclick="toggleLayout()">📊 Cambiar Layout</button>
-                <span class="last-update">Última actualización: <span id="lastUpdate">-</span></span>
-            </div>
-        </header>
+    <div class="app-container">
+        <!-- Navegación Principal -->
+        <nav class="navbar">
+            <a href="index.html" class="navbar-brand">🌐 Network Topology Manager</a>
+            <ul class="navbar-nav">
+                <li><a href="index.html" class="nav-link active">📊 Dashboard</a></li>
+                <li><a href="status.html" class="nav-link">⚡ Status</a></li>
+                <li><a href="scans.html" class="nav-link">🔍 Scans</a></li>
+                <li><a href="config.html" class="nav-link">⚙️ Config</a></li>
+                <li><a href="history.html" class="nav-link">📚 History</a></li>
+            </ul>
+        </nav>
 
-        <main>
-            <div class="sidebar">
-                <div class="legend">
-                    <h3>Leyenda</h3>
-                    <div class="legend-item">
-                        <div class="node gateway"></div>
-                        <span>Gateway</span>
+        <!-- Contenido Principal -->
+        <main class="content-wrapper">
+            <div class="page-container fade-in">
+                <h1 class="page-title">🌐 Network Topology Dashboard</h1>
+
+                <!-- Overview Cards -->
+                <div class="grid grid-4 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📊 System Status</div>
+                            <div class="card-subtitle">Current system state</div>
+                        </div>
+                        <div class="card-body">
+                            <div id="systemStatusIndicator" class="alert alert-info">
+                                <div class="loading-spinner"></div>
+                                Loading system status...
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="status.html" class="btn btn-primary btn-sm">View Details</a>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="node router"></div>
-                        <span>Router</span>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🎯 Quick Actions</div>
+                            <div class="card-subtitle">Fast operations</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="btn-group quick-actions">
+                                <button class="btn btn-success btn-sm" id="quickScanBtn">⚡ Quick Scan</button>
+                                <button class="btn btn-primary btn-sm" id="refreshTopologyBtn">🔄 Refresh Topology</button>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="scans.html" class="btn btn-outline btn-sm">Advanced Scans</a>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="node host"></div>
-                        <span>Host</span>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">📈 Network Stats</div>
+                            <div class="card-subtitle">Live network metrics</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-grid">
+                                <div class="stat-item">
+                                    <span class="stat-label">Devices:</span>
+                                    <span id="totalDevices" class="stat-value">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Connections:</span>
+                                    <span id="totalConnections" class="stat-value">-</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Gateways:</span>
+                                    <span id="totalGateways" class="stat-value">-</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="legend-item">
-                        <div class="edge route"></div>
-                        <span>Ruta IP</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="edge l2"></div>
-                        <span>Vecino L2</span>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">🕒 Last Update</div>
+                            <div class="card-subtitle">Data freshness</div>
+                        </div>
+                        <div class="card-body">
+                            <div id="lastUpdateInfo" class="text-muted">
+                                <div class="loading-spinner"></div>
+                                Loading update information...
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <a href="history.html" class="btn btn-secondary btn-sm">View History</a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="stats">
-                    <h3>Estadísticas</h3>
-                    <div class="stat">
-                        <span class="label">Dispositivos:</span>
-                        <span id="deviceCount">-</span>
+                <!-- Topology Visualization -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🌐 Network Topology Visualization</div>
+                        <div class="card-subtitle">Interactive network map</div>
                     </div>
-                    <div class="stat">
-                        <span class="label">Conexiones:</span>
-                        <span id="connectionCount">-</span>
-                    </div>
-                    <div class="stat">
-                        <span class="label">Gateways:</span>
-                        <span id="gatewayCount">-</span>
+                    <div class="card-body">
+                        <!-- Control Panel -->
+                        <div class="topology-controls mb-3">
+                            <div class="btn-group">
+                                <button class="btn btn-primary btn-sm" id="topologyRefreshBtn">
+                                    🔄 Refresh
+                                </button>
+                                <button class="btn btn-primary btn-sm" id="toggleLayoutBtn">
+                                    📊 Toggle Layout
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="centerViewBtn">
+                                    🎯 Center View
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="resetZoomBtn">
+                                    🔍 Reset Zoom
+                                </button>
+                            </div>
+                            <div class="topology-info">
+                                <span class="text-muted">
+                                    Last updated: <span id="topologyLastUpdate">Never</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Topology Container -->
+                        <div class="topology-container">
+                            <div class="topology-layout">
+                                <!-- Sidebar -->
+                                <div class="topology-sidebar">
+                                    <!-- Legend -->
+                                    <div class="topology-legend">
+                                        <h4>Legend</h4>
+                                        <div class="legend-items">
+                                            <div class="legend-item">
+                                                <div class="legend-icon gateway"></div>
+                                                <span>Gateway</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-icon router"></div>
+                                                <span>Router</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-icon host"></div>
+                                                <span>Host</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-icon switch"></div>
+                                                <span>Switch</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="legend-divider"></div>
+                                        
+                                        <div class="legend-connections">
+                                            <h5>Connections</h5>
+                                            <div class="legend-item">
+                                                <div class="legend-line route"></div>
+                                                <span>Route</span>
+                                            </div>
+                                            <div class="legend-item">
+                                                <div class="legend-line l2"></div>
+                                                <span>L2 Neighbor</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Network Stats -->
+                                    <div class="topology-stats">
+                                        <h4>Network Stats</h4>
+                                        <div class="stat-list">
+                                            <div class="stat-item">
+                                                <span>Devices:</span>
+                                                <span id="deviceCount">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>Connections:</span>
+                                                <span id="connectionCount">0</span>
+                                            </div>
+                                            <div class="stat-item">
+                                                <span>Gateways:</span>
+                                                <span id="gatewayCount">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Device List -->
+                                    <div class="topology-devices">
+                                        <h4>Devices</h4>
+                                        <div id="deviceList" class="device-list">
+                                            <div class="text-muted">No devices detected</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Visualization Area -->
+                                <div class="topology-main">
+                                    <div class="topology-canvas">
+                                        <svg id="topology-svg" width="100%" height="600">
+                                            <defs>
+                                                <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+                                                 refX="9" refY="3.5" orient="auto">
+                                                    <polygon points="0 0, 10 3.5, 0 7" fill="#74C365" />
+                                                </marker>
+                                            </defs>
+                                            <g class="topology-content">
+                                                <!-- Network visualization content -->
+                                            </g>
+                                        </svg>
+                                        
+                                        <!-- Loading Overlay -->
+                                        <div id="topologyLoading" class="topology-loading">
+                                            <div class="loading-spinner-lg"></div>
+                                            <div class="loading-text">Loading network topology...</div>
+                                        </div>
+                                        
+                                        <!-- Empty State -->
+                                        <div id="topologyEmpty" class="topology-empty d-none">
+                                            <div class="empty-icon">🌐</div>
+                                            <div class="empty-title">No Network Data</div>
+                                            <div class="empty-subtitle">Run a scan to discover your network topology</div>
+                                            <button class="btn btn-primary" id="emptyStateScanBtn">
+                                                🚀 Start Quick Scan
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="device-list">
-                    <h3>Dispositivos</h3>
-                    <div id="deviceList" class="device-items">
-                        <!-- Se llena dinámicamente -->
+                <!-- Status Footer -->
+                <div class="dashboard-footer">
+                    <div class="grid grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">🔔 System Notifications</div>
+                            </div>
+                            <div class="card-body">
+                                <div id="systemNotifications">
+                                    <div class="alert alert-info">
+                                        <span>🔄</span> System initialized and ready
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">⚡ Quick Links</div>
+                            </div>
+                            <div class="card-body">
+                                <div class="btn-group">
+                                    <a href="status.html" class="btn btn-outline btn-sm">System Status</a>
+                                    <a href="scans.html" class="btn btn-outline btn-sm">Run Scans</a>
+                                    <a href="config.html" class="btn btn-outline btn-sm">Configuration</a>
+                                    <a href="history.html" class="btn btn-outline btn-sm">View History</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="visualization">
-                <svg id="topology-svg" width="800" height="600">
-                    <!-- Visualización de red con D3.js -->
-                </svg>
             </div>
         </main>
-
-        <footer>
-            <div class="status" id="status">
-                <span class="status-indicator">⚪</span>
-                <span>Cargando topología...</span>
-            </div>
-        </footer>
     </div>
 
-    <script src="topology.js"></script>
+    <!-- Scripts -->
+    <script src="js/script.js"></script>
+    <script src="js/topology.js"></script>
+    <script src="js/dashboard.js"></script>
 </body>
 </html>

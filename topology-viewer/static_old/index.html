@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topología de Red - Network Scanner</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌐 Mapa Topológico de Red</h1>
+            <div class="controls">
+                <button onclick="refreshTopology()">🔄 Actualizar</button>
+                <button onclick="toggleLayout()">📊 Cambiar Layout</button>
+                <span class="last-update">Última actualización: <span id="lastUpdate">-</span></span>
+            </div>
+        </header>
+
+        <main>
+            <div class="sidebar">
+                <div class="legend">
+                    <h3>Leyenda</h3>
+                    <div class="legend-item">
+                        <div class="node gateway"></div>
+                        <span>Gateway</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="node router"></div>
+                        <span>Router</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="node host"></div>
+                        <span>Host</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="edge route"></div>
+                        <span>Ruta IP</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="edge l2"></div>
+                        <span>Vecino L2</span>
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <h3>Estadísticas</h3>
+                    <div class="stat">
+                        <span class="label">Dispositivos:</span>
+                        <span id="deviceCount">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Conexiones:</span>
+                        <span id="connectionCount">-</span>
+                    </div>
+                    <div class="stat">
+                        <span class="label">Gateways:</span>
+                        <span id="gatewayCount">-</span>
+                    </div>
+                </div>
+
+                <div class="device-list">
+                    <h3>Dispositivos</h3>
+                    <div id="deviceList" class="device-items">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization">
+                <svg id="topology-svg" width="800" height="600">
+                    <!-- Visualización de red con D3.js -->
+                </svg>
+            </div>
+        </main>
+
+        <footer>
+            <div class="status" id="status">
+                <span class="status-indicator">⚪</span>
+                <span>Cargando topología...</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="topology.js"></script>
+</body>
+</html>
